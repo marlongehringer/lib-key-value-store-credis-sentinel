@@ -1,5 +1,5 @@
 {
-    "name": "marlongehringer/lib-key-value-store-credis",
+    "name": "marlongehringer/lib-key-value-store-credis-sentinel",
     "description": "Lizards & Pumpkins Key/Value Store Library For CRedis with Sentinel",
     "license": "BSD-3-Clause",
     "authors": [
