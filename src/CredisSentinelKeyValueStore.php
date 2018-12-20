@@ -55,7 +55,7 @@ class CredisSentinelKeyValueStore implements KeyValueStore
             return [];
         }
 
-        $values = $this->cluster->mGet($keys);
+        $values = $this->getClient()->mGet($keys);
         $items = array_combine($keys, $values);
 
         return array_filter($items);
@@ -66,6 +66,17 @@ class CredisSentinelKeyValueStore implements KeyValueStore
      */
     public function multiSet(array $items)
     {
-        $this->cluster->mSet($items);
+        $this->getClient()->mSet($items);
+    }
+
+    /**
+     * @return \Credis_Client
+     */
+    public function getClient()
+    {
+        $clients = $this->cluster->clients();
+        $key = array_rand($clients);
+
+        return $clients[$key];
     }
 }

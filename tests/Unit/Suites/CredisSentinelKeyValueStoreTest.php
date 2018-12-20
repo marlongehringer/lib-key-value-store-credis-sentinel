@@ -23,12 +23,28 @@ class CredisSentinelKeyValueStoreTest extends TestCase
      */
     private $mockCluster;
 
+    /**
+     * @var \Credis_Client|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $mockClient;
+
     public function setUp()
     {
         $this->mockCluster = $this->getMockBuilder(Credis_Cluster::class)
             ->disableOriginalConstructor()
+            ->setMethods(['get', 'set', 'exists', 'mGet', 'mSet', 'clients'])
+            ->getMock();
+
+        $this->mockClient = $this->getMockBuilder(\Credis_Client::class)
+            ->disableOriginalConstructor()
             ->setMethods(['get', 'set', 'exists', 'mGet', 'mSet'])
             ->getMock();
+
+        $this->mockCluster->method('clients')
+            ->will($this->returnValue([
+                $this->mockClient
+            ]));
+
         $this->store = new CredisSentinelKeyValueStore($this->mockCluster);
     }
 
@@ -70,7 +86,7 @@ class CredisSentinelKeyValueStoreTest extends TestCase
     {
         $items = ['key1' => 'foo', 'key2' => 'bar'];
 
-        $this->mockCluster->expects($this->once())->method('mSet')->with($items);
+        $this->mockClient->expects($this->once())->method('mSet')->with($items);
         $this->store->multiSet($items);
     }
 
@@ -84,7 +100,7 @@ class CredisSentinelKeyValueStoreTest extends TestCase
         $items = ['key1' => 'foo', 'key2' => 'bar'];
         $keys = array_keys($items);
 
-        $this->mockCluster->expects($this->once())->method('mGet')->with($keys)->willReturn($items);
+        $this->mockClient->expects($this->once())->method('mGet')->with($keys)->willReturn($items);
 
         $this->assertSame($items, $this->store->multiGet(...$keys));
     }
